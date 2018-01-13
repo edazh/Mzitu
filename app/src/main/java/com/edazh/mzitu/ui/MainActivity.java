@@ -1,8 +1,9 @@
-package com.edazh.mzitu;
+package com.edazh.mzitu.ui;
 
 import android.support.v4.app.Fragment;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+
+import com.edazh.mzitu.SingleFragmentActivity;
+import com.edazh.mzitu.ui.MainFragment;
 
 public class MainActivity extends SingleFragmentActivity {
 

@@ -1,0 +1,41 @@
+package com.edazh.mzitu.vo;
+
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+/**
+ * Created by edazh on 2018/1/10 0010.
+ * A generic class that holds a value with its loading status.
+ */
+
+public class Resource<T> {
+
+    @NonNull
+    public final Status status;
+
+    @Nullable
+    public final String message;
+
+    @Nullable
+    public final T data;
+
+    public Resource(@NonNull Status status, @Nullable String message, @Nullable T data) {
+        this.status = status;
+        this.message = message;
+        this.data = data;
+    }
+
+    public static <T> Resource<T> success(@Nullable T data) {
+        return new Resource<>(Status.SUCCESS, null, data);
+    }
+
+    public static <T> Resource<T> error(String msg, @Nullable T data) {
+        return new Resource<>(Status.ERROR, msg, data);
+    }
+
+    public static <T> Resource<T> loading(@Nullable T data) {
+        return new Resource<>(Status.LOADING, null, data);
+    }
+
+
+}
