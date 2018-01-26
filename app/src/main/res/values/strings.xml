@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Mzitu</string>
+    <string name="retry">重新加载</string>
 </resources>

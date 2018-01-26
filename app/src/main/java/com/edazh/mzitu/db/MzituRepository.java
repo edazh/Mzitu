@@ -1,16 +1,25 @@
 package com.edazh.mzitu.db;
 
+import android.arch.core.util.Function;
 import android.arch.lifecycle.LiveData;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.arch.lifecycle.MutableLiveData;
+import android.arch.lifecycle.Transformations;
+import android.arch.paging.DataSource;
+import android.arch.paging.LivePagedListBuilder;
+import android.arch.paging.PagedList;
+import android.support.annotation.MainThread;
 
 import com.edazh.mzitu.AppExecutors;
-import com.edazh.mzitu.api.ApiResponse;
 import com.edazh.mzitu.api.MzituService;
-import com.edazh.mzitu.vo.Main;
-import com.edazh.mzitu.vo.Resource;
+import com.edazh.mzitu.ui.callback.RefreshCallback;
+import com.edazh.mzitu.ui.callback.RetryCallback;
+import com.edazh.mzitu.vo.Album;
 
 import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * Created by edazh on 2018/1/11 0011.
@@ -42,30 +51,75 @@ public class MzituRepository {
         return sInstance;
     }
 
-    public LiveData<Resource<Main>> loadMain() {
-        return new NetworkBoundResource<Main, Main>(mExecutors) {
+    @MainThread
+    public Listing<Album> loadAlbums(final String pageName) {
+        DataSource.Factory<Integer, Album> factory = mDatabase.albumDao().loadByPageNameAndLink(pageName);
+        final AlbumBoundaryCallback albumBoundaryCallback = new AlbumBoundaryCallback(mExecutors, mDatabase.albumDao(), mMzituService);
+        LiveData<PagedList<Album>> pagedList = new LivePagedListBuilder<Integer, Album>(factory, new PagedList.Config.Builder()
+                .setPrefetchDistance(24)
+                .setEnablePlaceholders(true)
+                .setPageSize(24)
+                .build())
+                .setBoundaryCallback(albumBoundaryCallback)
+                .setBackgroundThreadExecutor(mExecutors.networkIO())
+                .build();
+
+        final MutableLiveData<Void> refreshTrigger = new MutableLiveData<>();
+        LiveData<NetworkState> refreshState = Transformations.switchMap(refreshTrigger, new Function<Void, LiveData<NetworkState>>() {
             @Override
-            protected void saveCallResult(@NonNull Main item) {
-                mDatabase.mainDao().insert(item);
+            public LiveData<NetworkState> apply(Void input) {
+                return refresh(pageName);
+            }
+        });
+
+        return new Listing<Album>(pagedList,
+                albumBoundaryCallback.getNetworkState(),
+                refreshState,
+                new RefreshCallback() {
+                    @Override
+                    public void onRefresh() {
+                        refreshTrigger.setValue(null);
+                    }
+                },
+                new RetryCallback() {
+                    @Override
+                    public void onRetry() {
+                        albumBoundaryCallback.getPagingRequestHelper().retryAllFailed();
+                    }
+                }
+        );
+
+    }
+
+    @MainThread
+    public LiveData<NetworkState> refresh(final String pageName) {
+        final MutableLiveData<NetworkState> networkState = new MutableLiveData<>();
+        networkState.setValue(NetworkState.loading());
+        mMzituService.getAlbumOfMainPage("1").enqueue(new Callback<List<Album>>() {
+            @Override
+            public void onResponse(Call<List<Album>> call, final Response<List<Album>> response) {
+                mExecutors.diskIO().execute(new Runnable() {
+                    @Override
+                    public void run() {
+                        mDatabase.runInTransaction(new Runnable() {
+                            @Override
+                            public void run() {
+                                mDatabase.albumDao().deleteAlbumsByPageName(pageName);
+                                mDatabase.albumDao().insertAll(response.body());
+                            }
+                        });
+                        networkState.postValue(NetworkState.success());
+                    }
+                });
             }
 
-            @NonNull
             @Override
-            protected LiveData<ApiResponse<Main>> createCall() {
-                return mMzituService.getMain();
+            public void onFailure(Call<List<Album>> call, Throwable t) {
+                networkState.setValue(NetworkState.error(t.getMessage()));
             }
+        });
 
-            @Override
-            protected boolean shouldFetch(@Nullable Main data) {
-                return data == null;
-            }
-
-            @NonNull
-            @Override
-            protected LiveData<Main> loadFromDb() {
-                return mDatabase.mainDao().loadMain();
-            }
-        }.asLiveData();
+        return networkState;
     }
 
 }

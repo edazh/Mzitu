@@ -1,28 +1,28 @@
 package com.edazh.mzitu.db;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.MediatorLiveData;
 import android.arch.lifecycle.MutableLiveData;
-import android.arch.persistence.db.SupportSQLiteDatabase;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
 import android.content.Context;
-import android.support.annotation.NonNull;
 
 import com.edazh.mzitu.AppExecutors;
-import com.edazh.mzitu.vo.Main;
+import com.edazh.mzitu.vo.Album;
 
 /**
  * Created by edazh on 2018/1/11 0011.
  */
-@Database(entities = {Main.class}, version = 1)
+@Database(entities = {Album.class}, version = 1, exportSchema = false)
 public abstract class MzituDatabase extends RoomDatabase {
 
     private static MzituDatabase sInstance;
 
     public static final String DATABASE_NAME = "mzitu-db";
 
-    public abstract MainDao mainDao();
+    public abstract AlbumDao albumDao();
+
 
     private final MutableLiveData<Boolean> mIsDatabaseCreated = new MediatorLiveData<>();
 
@@ -52,5 +52,8 @@ public abstract class MzituDatabase extends RoomDatabase {
         return Room.databaseBuilder(context, MzituDatabase.class, DATABASE_NAME).build();
     }
 
+    public LiveData<Boolean> isDatabaseCreated() {
+        return mIsDatabaseCreated;
+    }
 
 }

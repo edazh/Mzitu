@@ -1,4 +1,4 @@
-package com.edazh.mzitu.vo;
+package com.edazh.mzitu.db;
 
 /**
  * Created by edazh on 2018/1/10 0010.

@@ -1,7 +1,10 @@
-package com.edazh.mzitu.vo;
+package com.edazh.mzitu.db;
 
+import android.arch.paging.PageKeyedDataSource;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
+import com.edazh.mzitu.vo.Album;
 
 /**
  * Created by edazh on 2018/1/10 0010.
@@ -19,7 +22,7 @@ public class Resource<T> {
     @Nullable
     public final T data;
 
-    public Resource(@NonNull Status status, @Nullable String message, @Nullable T data) {
+    private Resource(@NonNull Status status, @Nullable String message, @Nullable T data) {
         this.status = status;
         this.message = message;
         this.data = data;

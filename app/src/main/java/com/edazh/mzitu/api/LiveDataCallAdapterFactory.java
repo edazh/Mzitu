@@ -12,7 +12,11 @@ import retrofit2.CallAdapter;
 import retrofit2.Retrofit;
 
 /**
- * Created by edazh on 2018/1/11 0011.
+ *  项目：Mzitu
+ *  作者：edazh
+ *  邮箱：edazh@qq.com
+ *  时间：2018/1/11 0011
+ *  描述：
  */
 
 public class LiveDataCallAdapterFactory extends CallAdapter.Factory {

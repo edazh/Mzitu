@@ -10,7 +10,6 @@ import android.support.annotation.WorkerThread;
 
 import com.edazh.mzitu.AppExecutors;
 import com.edazh.mzitu.api.ApiResponse;
-import com.edazh.mzitu.vo.Resource;
 
 import java.util.Objects;
 
@@ -25,7 +24,7 @@ public abstract class NetworkBoundResource<ResultType, RequestType> {
     private final MediatorLiveData<Resource<ResultType>> result = new MediatorLiveData<>();
 
     @MainThread
-    NetworkBoundResource(AppExecutors appExecutors) {
+    public NetworkBoundResource(AppExecutors appExecutors) {
         mExecutors = appExecutors;
         result.setValue(Resource.<ResultType>loading(null));
         final LiveData<ResultType> dbSource = loadFromDb();

@@ -11,7 +11,11 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 /**
- * Created by edazh on 2018/1/11 0011.
+ *  项目：Mzitu
+ *  作者：edazh
+ *  邮箱：edazh@qq.com
+ *  时间：2018/1/11 0011
+ *  描述：${PACKAGE_NAME}
  */
 
 public class LiveDataCallAdapter<R> implements CallAdapter<R, LiveData<ApiResponse<R>>> {
