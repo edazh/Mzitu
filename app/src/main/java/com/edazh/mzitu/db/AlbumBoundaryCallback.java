@@ -6,6 +6,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.edazh.mzitu.AppExecutors;
+import com.edazh.mzitu.api.ListingResponse;
 import com.edazh.mzitu.api.MzituService;
 import com.edazh.mzitu.util.PagingRequestHelper;
 import com.edazh.mzitu.util.PagingRequestHelperExt;
@@ -28,18 +29,18 @@ import retrofit2.Response;
 public class AlbumBoundaryCallback extends PagedList.BoundaryCallback<Album> {
     private static final String TAG = "AlbumBoundaryCallback";
     private final AppExecutors mExecutors;
-    private final AlbumDao mAlbumDao;
+    private final MzituDatabase mDatabase;
     private final MzituService mService;
 
     private final PagingRequestHelperExt mHelper;
 
     private final LiveData<NetworkState> networkState;
 
-    public AlbumBoundaryCallback(AppExecutors executors, AlbumDao albumDao, MzituService service) {
+    public AlbumBoundaryCallback(AppExecutors executors, MzituDatabase database, MzituService service) {
         mExecutors = executors;
-        mAlbumDao = albumDao;
+        mDatabase = database;
         mService = service;
-        mHelper = new PagingRequestHelperExt(executors.diskIO());
+        mHelper = new PagingRequestHelperExt(executors.networkIO());
         networkState = mHelper.createStatusLiveData();
     }
 
@@ -72,18 +73,23 @@ public class AlbumBoundaryCallback extends PagedList.BoundaryCallback<Album> {
     private Callback<List<Album>> createWebserviceCallback(final PagingRequestHelper.Request.Callback callback) {
         return new Callback<List<Album>>() {
             @Override
-            public void onResponse(Call<List<Album>> call, final Response<List<Album>> response) {
+            public void onResponse(@NonNull Call<List<Album>> call, @NonNull final Response<List<Album>> response) {
                 mExecutors.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
-                        mAlbumDao.insertAll(response.body());
+                        mDatabase.runInTransaction(new Runnable() {
+                            @Override
+                            public void run() {
+                                mDatabase.albumDao().insertAll(response.body());
+                            }
+                        });
                         callback.recordSuccess();
                     }
                 });
             }
 
             @Override
-            public void onFailure(Call<List<Album>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<Album>> call, @NonNull Throwable t) {
                 callback.recordFailure(t);
             }
         };
@@ -93,7 +99,7 @@ public class AlbumBoundaryCallback extends PagedList.BoundaryCallback<Album> {
         return networkState;
     }
 
-    public PagingRequestHelper getPagingRequestHelper() {
+    public PagingRequestHelperExt getPagingRequestHelper() {
         return mHelper;
     }
 }

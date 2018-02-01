@@ -8,6 +8,7 @@ import android.arch.paging.DataSource;
 import android.arch.paging.LivePagedListBuilder;
 import android.arch.paging.PagedList;
 import android.support.annotation.MainThread;
+import android.support.annotation.NonNull;
 
 import com.edazh.mzitu.AppExecutors;
 import com.edazh.mzitu.api.MzituService;
@@ -54,14 +55,9 @@ public class MzituRepository {
     @MainThread
     public Listing<Album> loadAlbums(final String pageName) {
         DataSource.Factory<Integer, Album> factory = mDatabase.albumDao().loadByPageNameAndLink(pageName);
-        final AlbumBoundaryCallback albumBoundaryCallback = new AlbumBoundaryCallback(mExecutors, mDatabase.albumDao(), mMzituService);
-        LiveData<PagedList<Album>> pagedList = new LivePagedListBuilder<Integer, Album>(factory, new PagedList.Config.Builder()
-                .setPrefetchDistance(24)
-                .setEnablePlaceholders(true)
-                .setPageSize(24)
-                .build())
+        final AlbumBoundaryCallback albumBoundaryCallback = new AlbumBoundaryCallback(mExecutors, mDatabase, mMzituService);
+        LiveData<PagedList<Album>> pagedList = new LivePagedListBuilder<>(factory, 24)
                 .setBoundaryCallback(albumBoundaryCallback)
-                .setBackgroundThreadExecutor(mExecutors.networkIO())
                 .build();
 
         final MutableLiveData<Void> refreshTrigger = new MutableLiveData<>();
@@ -97,7 +93,7 @@ public class MzituRepository {
         networkState.setValue(NetworkState.loading());
         mMzituService.getAlbumOfMainPage("1").enqueue(new Callback<List<Album>>() {
             @Override
-            public void onResponse(Call<List<Album>> call, final Response<List<Album>> response) {
+            public void onResponse(@NonNull Call<List<Album>> call, @NonNull final Response<List<Album>> response) {
                 mExecutors.diskIO().execute(new Runnable() {
                     @Override
                     public void run() {
@@ -114,7 +110,7 @@ public class MzituRepository {
             }
 
             @Override
-            public void onFailure(Call<List<Album>> call, Throwable t) {
+            public void onFailure(@NonNull Call<List<Album>> call, @NonNull Throwable t) {
                 networkState.setValue(NetworkState.error(t.getMessage()));
             }
         });

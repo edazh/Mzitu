@@ -61,7 +61,6 @@ public class NewestFragment extends Fragment {
 
         final AlbumListViewModel viewModel = ViewModelProviders.of(this).get(AlbumListViewModel.class);
 
-        viewModel.showPage("首页");
 
         mAdapter = new PagedAlbumAdapter(new RetryCallback() {
             @Override
@@ -69,7 +68,11 @@ public class NewestFragment extends Fragment {
                 viewModel.retry();
             }
         });
-        mBinding.albumList.setAdapter(mAdapter);
+
+        if (viewModel.showPage("首页")) {
+            mBinding.albumList.setAdapter(mAdapter);
+        }
+
 
         viewModel.mAlbumListLiveData.observe(this, new Observer<PagedList<Album>>() {
             @Override

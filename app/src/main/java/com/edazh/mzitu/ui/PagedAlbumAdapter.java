@@ -5,6 +5,7 @@ import android.databinding.DataBindingUtil;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.support.v7.recyclerview.extensions.DiffCallback;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
@@ -14,6 +15,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestBuilder;
 import com.bumptech.glide.load.model.GlideUrl;
 import com.bumptech.glide.load.model.LazyHeaders;
+import com.edazh.mzitu.GlideApp;
 import com.edazh.mzitu.R;
 import com.edazh.mzitu.databinding.ItemAlbumBinding;
 import com.edazh.mzitu.databinding.NetworkStateItemBinding;
@@ -71,6 +73,30 @@ public class PagedAlbumAdapter extends PagedListAdapter<Album, RecyclerView.View
         }
     }
 
+    @Override
+    public void onAttachedToRecyclerView(RecyclerView recyclerView) {
+        super.onAttachedToRecyclerView(recyclerView);
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+
+        if (layoutManager instanceof GridLayoutManager) {
+            GridLayoutManager gridLayoutManager = (GridLayoutManager) layoutManager;
+
+            gridLayoutManager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    switch (getItemViewType(position)) {
+                        case R.layout.item_album:
+                            return 1;
+                        case R.layout.network_state_item:
+                            return 2;
+                        default:
+                            return 1;
+                    }
+                }
+            });
+        }
+    }
+
     public void setNetworkState(NetworkState networkState) {
         NetworkState previousState = mNetworkState;
         boolean hadExtraRow = hasExtraRow();
@@ -82,13 +108,13 @@ public class PagedAlbumAdapter extends PagedListAdapter<Album, RecyclerView.View
             } else {
                 notifyItemInserted(super.getItemCount());
             }
-        } else if (hasExtraRow && previousState != networkState) {
+        } else if (hasExtraRow && mNetworkState.equals(networkState)) {
             notifyItemChanged(getItemCount() - 1);
         }
     }
 
     private boolean hasExtraRow() {
-        return mNetworkState != null && mNetworkState != NetworkState.success();
+        return mNetworkState != null && mNetworkState.equals(NetworkState.success());
     }
 
     @Override
@@ -111,9 +137,12 @@ public class PagedAlbumAdapter extends PagedListAdapter<Album, RecyclerView.View
         }
 
         public void bindTo(Album album) {
+            if (album == null) {
+                return;
+            }
             binding.setAlbum(album);
             GlideUrl url = new GlideUrl(album.getCoverLink(), new LazyHeaders.Builder().addHeader("Referer", "http://www.mzitu.com/").build());
-            Glide.with(itemView).load(url).into(binding.imgCover);
+            GlideApp.with(itemView).load(url).into(binding.imgCover);
             binding.executePendingBindings();
         }
     }

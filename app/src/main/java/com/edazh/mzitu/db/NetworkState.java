@@ -34,4 +34,19 @@ public class NetworkState {
     public static NetworkState error(String msg) {
         return new NetworkState(Status.ERROR, msg);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || this.getClass() != obj.getClass()) {
+            return false;
+        }
+        NetworkState state = (NetworkState) obj;
+        if (status != state.status) {
+            return false;
+        }
+        return message != null ? message.equals(state.message) : state.message == null;
+    }
 }

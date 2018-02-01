@@ -24,6 +24,6 @@ public interface AlbumDao {
     @Query("delete from album where page_name = :pageName")
     void deleteAlbumsByPageName(String pageName);
 
-    @Query("select * from album where page_name = :pageName")
+    @Query("select * from album where page_name = :pageName order by id desc")
     DataSource.Factory<Integer, Album> loadByPageNameAndLink(String pageName);
 }

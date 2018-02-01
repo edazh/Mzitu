@@ -20,20 +20,20 @@ public class ListingResponse {
     public final int code;
 
     @Nullable
-    public String nextLink;
+    public final String errorMessage;
 
     @Nullable
-    public final String errorMessage;
+    public final List<Album> data;
 
     public ListingResponse(Throwable throwable) {
         code = 500;
-        nextLink = null;
+        data = null;
         errorMessage = throwable.getMessage();
     }
 
-    public ListingResponse(Response response) {
+    public ListingResponse(Response<List<Album>> response) {
         code = response.code();
-        nextLink = null;
+        data = response.body();
         errorMessage = null;
     }
 

@@ -1,39 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
+        <import type="com.edazh.mzitu.db.Status" />
 
         <variable
             name="state"
             type="com.edazh.mzitu.db.NetworkState" />
+
+        <variable
+            name="callback"
+            type="com.edazh.mzitu.ui.callback.RetryCallback" />
     </data>
 
-    <LinearLayout
+    <android.support.constraint.ConstraintLayout
+        visibleGone="@{state.status!=Status.SUCCESS}"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp">
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/error_msg"
+            visibleHide="@{state.status == Status.ERROR}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:text="@{state.message}" />
+            android:padding="8dp"
+            android:text="@{state.message ?? @string/unknow_error}"
+            android:textColor="@color/colorAccent"
+            app:layout_constraintBottom_toTopOf="@id/retry_button"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="网络错误" />
 
         <ProgressBar
             android:id="@+id/progress_bar"
             style="?android:attr/progressBarStyle"
+            visibleHide="@{state.status==Status.LOADING}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center" />
+            android:padding="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/error_msg"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <Button
             android:id="@+id/retry_button"
             style="@style/Widget.AppCompat.Button.Colored"
+            visibleHide="@{state.status==Status.ERROR}"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="@string/retry" />
-    </LinearLayout>
+            android:onClick="@{() -> callback.onRetry()}"
+            android:paddingBottom="8dp"
+            android:text="@string/retry"
+            app:layout_constraintBottom_toBottomOf="@id/progress_bar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/error_msg" />
+    </android.support.constraint.ConstraintLayout>
 </layout>

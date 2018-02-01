@@ -6,6 +6,7 @@ import android.arch.lifecycle.MutableLiveData;
 import android.arch.persistence.room.Database;
 import android.arch.persistence.room.Room;
 import android.arch.persistence.room.RoomDatabase;
+import android.arch.persistence.room.RoomOpenHelper;
 import android.content.Context;
 
 import com.edazh.mzitu.AppExecutors;
@@ -43,7 +44,6 @@ public abstract class MzituDatabase extends RoomDatabase {
             setDatabaseCreate();
         }
     }
-
     private void setDatabaseCreate() {
         mIsDatabaseCreated.postValue(true);
     }

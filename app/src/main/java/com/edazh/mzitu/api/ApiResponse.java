@@ -30,6 +30,8 @@ public class ApiResponse<T> {
         code = response.code();
         body = response.body();
         errorMessage = null;
+
+
     }
 
     public boolean isSuccessful() {

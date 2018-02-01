@@ -2,6 +2,8 @@ package com.edazh.mzitu;
 
 import android.app.Application;
 
+import com.bumptech.glide.annotation.GlideModule;
+import com.bumptech.glide.module.AppGlideModule;
 import com.edazh.mzitu.api.LiveDataCallAdapterFactory;
 import com.edazh.mzitu.api.MzituService;
 import com.edazh.mzitu.api.convert.BaseConvertFactory;
@@ -53,5 +55,6 @@ public class MzituApp extends Application {
         }
         return mMzituService;
     }
-
 }
+
+

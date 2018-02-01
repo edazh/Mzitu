@@ -3,6 +3,7 @@ package com.edazh.mzitu.api;
 import android.arch.lifecycle.LiveData;
 import android.arch.paging.PagedList;
 
+import com.edazh.mzitu.db.Listing;
 import com.edazh.mzitu.vo.Album;
 import com.edazh.mzitu.vo.MM;
 

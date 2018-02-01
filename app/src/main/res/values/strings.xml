@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">Mzitu</string>
     <string name="retry">重新加载</string>
+    <string name="unknow_error">网络连接失败</string>
 </resources>

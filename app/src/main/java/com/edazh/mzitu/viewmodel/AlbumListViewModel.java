@@ -15,6 +15,8 @@ import com.edazh.mzitu.db.MzituRepository;
 import com.edazh.mzitu.db.NetworkState;
 import com.edazh.mzitu.vo.Album;
 
+import java.util.List;
+
 /**
  * Created by edazh on 2018/1/14 0014.
  * e-mail:edazh@qq.com
@@ -75,8 +77,11 @@ public class AlbumListViewModel extends AndroidViewModel {
     }
 
     public void refresh() {
-        if (mListingLiveData.getValue() != null) {
-            mListingLiveData.getValue().refreshCallback.onRefresh();
+        Listing<Album> listing = mListingLiveData.getValue();
+        if (listing != null) {
+            if (listing.refreshCallback != null) {
+                listing.refreshCallback.onRefresh();
+            }
         }
     }
 
